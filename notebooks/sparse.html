@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>General Sparse Constraints &mdash; ParOpt  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=a888008e"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class reference" href="../reference.html" />
+    <link rel="prev" title="Parallel OpenMDAO example" href="../parallel_openmdao_example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ParOpt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../options.html">Options and generic interface for ParOpt optimziers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rosenbrock.html">Rosenbrock example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sellar.html">Sellar problem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parallel_rosenbrock.html">Parallel Rosenbrock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../openmdao_example.html">OpenMDAO example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parallel_openmdao_example.html">Parallel OpenMDAO example</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">General Sparse Constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference.html">Class reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ParOpt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">General Sparse Constraints</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="General-Sparse-Constraints">
+<h1>General Sparse Constraints<a class="headerlink" href="#General-Sparse-Constraints" title="Permalink to this heading"></a></h1>
+<p>ParOpt now supports general sparse constraints. This new feature is still being developed, but will eventually work in parallel in the same manner as the Jacobian-free sparse constraints in earlier versions of ParOpt. For now these constraints must be for serial problems only.</p>
+<p>The following example illustrates the use of sparse constraints on a simple problem. This is the electron problem from the COPS optimization problem set.</p>
+<p>To use the sparse constraints, the problem class must still inherit from <code class="docutils literal notranslate"><span class="pre">ParOpt.Problem</span></code>, but requires different initializer options.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The super class initialization</span>
+<span class="nb">super</span><span class="p">(</span><span class="n">Electron</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">,</span>
+    <span class="n">nvars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nvars</span><span class="p">,</span>
+    <span class="n">num_sparse_constraints</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_sparse_constraints</span><span class="p">,</span>
+    <span class="n">num_sparse_inequalities</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">rowp</span><span class="o">=</span><span class="n">rowp</span><span class="p">,</span>
+    <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The super class takes the following arguments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">comm</span></code> The MPI communicator</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nvars</span></code> The number of local variables</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num_sparse_constraints</span></code> The number of sparse constraints</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num_sparse_inequalities</span></code> The number of sparse inequalities - ordered before the equality constraints <code class="docutils literal notranslate"><span class="pre">num_sparse_inequalities</span> <span class="pre">&lt;=</span> <span class="pre">num_sparse_constraints</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rowp</span></code> An array of length <code class="docutils literal notranslate"><span class="pre">num_sparse_constraints</span> <span class="pre">+</span> <span class="pre">1</span></code> with the offset into the rows of the sparse constraint Jacobian</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cols</span></code> An array of length <code class="docutils literal notranslate"><span class="pre">rowp[num_sparse_constraints</span> <span class="pre">+</span> <span class="pre">1]</span></code> with the column indices of the variables for each constraint</p></li>
+</ul>
+<p>The member function <code class="docutils literal notranslate"><span class="pre">evalSparseObjCon(self,</span> <span class="pre">x,</span> <span class="pre">sparse_cons)</span></code> evaluates the objective, dense constraints and sparse constraints. The sparse constraint values are written directly into <code class="docutils literal notranslate"><span class="pre">sparse_cons</span></code> that is a direct wrapper into the underlying <code class="docutils literal notranslate"><span class="pre">ParOpt.Vec</span></code> memory.</p>
+<p>The member function <code class="docutils literal notranslate"><span class="pre">evalSparseObjConGradient(self,</span> <span class="pre">x,</span> <span class="pre">g,</span> <span class="pre">A,</span> <span class="pre">data)</span></code> evaluates the objective gradient, dense constraint Jacobian and sparse constraint Jacobian. The sparse constraint Jacobian is written directly into <code class="docutils literal notranslate"><span class="pre">data</span></code> that is a direct wrapper for the underlying memory of the sparse constraint Jacobian.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">paropt</span> <span class="kn">import</span> <span class="n">ParOpt</span><span class="p">,</span> <span class="n">plot_history</span>
+<span class="kn">import</span> <span class="nn">mpi4py.MPI</span> <span class="k">as</span> <span class="nn">MPI</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<span class="k">class</span> <span class="nc">Electron</span><span class="p">(</span><span class="n">ParOpt</span><span class="o">.</span><span class="n">Problem</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+        <span class="c1"># Set the communicator pointer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nvars</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_sparse_constraints</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+
+        <span class="n">rowp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">rowp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">))</span>
+
+        <span class="c1"># Initialize the base class</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Electron</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">,</span>
+            <span class="n">nvars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nvars</span><span class="p">,</span>
+            <span class="n">num_sparse_constraints</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_sparse_constraints</span><span class="p">,</span>
+            <span class="n">num_sparse_inequalities</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">rowp</span><span class="o">=</span><span class="n">rowp</span><span class="p">,</span>
+            <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">getVarsAndBounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the values of the bounds&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
+
+        <span class="c1"># x = [x_1, ..., x_n, y_1, ..., y_n, z_1, ..., z_n]</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">beta</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">beta</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">x</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">beta</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">lb</span><span class="p">[:]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.0</span>
+        <span class="n">ub</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">10.0</span>
+
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">evalSparseObjCon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">sparse_cons</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the objective and constraint&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span>
+        <span class="n">_x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="n">n</span><span class="p">]</span>
+        <span class="n">_y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">n</span> <span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">]</span>
+        <span class="n">_z</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="p">:]</span>
+
+        <span class="n">fobj</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">dsq</span> <span class="o">=</span> <span class="p">(</span><span class="n">_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_x</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">_y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_y</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_z</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="k">if</span> <span class="n">dsq</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">:</span>
+                    <span class="n">dsq</span> <span class="o">=</span> <span class="n">epsilon</span>
+                <span class="n">fobj</span> <span class="o">+=</span> <span class="n">dsq</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">sparse_cons</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">_y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">con</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fail</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">fail</span><span class="p">,</span> <span class="n">fobj</span><span class="p">,</span> <span class="n">con</span>
+
+    <span class="k">def</span> <span class="nf">evalSparseObjConGradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the objective and constraint gradient&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span>
+        <span class="n">_x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="n">n</span><span class="p">]</span>
+        <span class="n">_y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">n</span> <span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">]</span>
+        <span class="n">_z</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="p">:]</span>
+
+        <span class="n">g</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">dsq</span> <span class="o">=</span> <span class="p">(</span><span class="n">_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_x</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">_y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_y</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_z</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="k">if</span> <span class="n">dsq</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">:</span>
+                    <span class="n">dsq</span> <span class="o">=</span> <span class="n">epsilon</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">fact</span> <span class="o">=</span> <span class="n">dsq</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="p">(</span><span class="n">_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_x</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="n">fact</span>
+                    <span class="n">g</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_x</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="n">fact</span>
+                    <span class="n">g</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="p">(</span><span class="n">_y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_y</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="n">fact</span>
+                    <span class="n">g</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">_y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_y</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="n">fact</span>
+                    <span class="n">g</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="p">(</span><span class="n">_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_z</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="n">fact</span>
+                    <span class="n">g</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_z</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="n">fact</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">_y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">fail</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">fail</span>
+
+<span class="c1"># use interior point algorithm</span>
+<span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;ip&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;norm_type&quot;</span><span class="p">:</span> <span class="s2">&quot;infinity&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;qn_type&quot;</span><span class="p">:</span> <span class="s2">&quot;bfgs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;qn_subspace_size&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">&quot;starting_point_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;least_squares_multipliers&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;qn_update_type&quot;</span><span class="p">:</span> <span class="s2">&quot;damped_update&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;abs_res_tol&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span>
+    <span class="s2">&quot;barrier_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;monotone&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;armijo_constant&quot;</span><span class="p">:</span> <span class="mf">1e-5</span><span class="p">,</span>
+    <span class="s2">&quot;penalty_gamma&quot;</span><span class="p">:</span> <span class="mf">100.0</span><span class="p">,</span>
+    <span class="s2">&quot;max_major_iters&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">Electron</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mf">1e-15</span><span class="p">)</span>
+<span class="c1"># It is a good idea to check gradients, but this call doesn&#39;t work for the moment for sparse constraints</span>
+<span class="c1"># problem.checkGradients()</span>
+<span class="n">opt</span> <span class="o">=</span> <span class="n">ParOpt</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+<span class="n">opt</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+<span class="n">plot_history</span><span class="p">(</span><span class="s2">&quot;paropt.out&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_sparse_1_0.png" src="../_images/notebooks_sparse_1_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../parallel_openmdao_example.html" class="btn btn-neutral float-left" title="Parallel OpenMDAO example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../reference.html" class="btn btn-neutral float-right" title="Class reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Graeme Kennedy.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
